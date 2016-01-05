@@ -94,6 +94,7 @@
     <string name="alarm">Alarm</string>
     <string name="cancel_alarm">Alarm Cancelled</string>
     <string name="time_picker_title">Pick up time to schedule music alarm in everyday</string>
+    <string name="alarm_on_set">Music will play in everyday on \t </string>
 
 
 </resources>

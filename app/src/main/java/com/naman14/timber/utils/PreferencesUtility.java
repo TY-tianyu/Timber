@@ -28,6 +28,7 @@ public final class PreferencesUtility {
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
     public static final String ALBUM_SONG_SORT_ORDER = "album_song_sort_order";
     public static final String SONG_SORT_ORDER = "song_sort_order";
+    public static final String PREFERENCE_NAME = "share_data";
     private static final String NOW_PLAYING_SELECTOR = "now_paying_selector";
     private static final String TOGGLE_ANIMATIONS = "toggle_animations";
     private static final String TOGGLE_SYSTEM_ANIMATIONS = "toggle_system_animations";
@@ -196,4 +197,47 @@ public final class PreferencesUtility {
     public void setSongSortOrder(final String value) {
         setSortOrder(SONG_SORT_ORDER, value);
     }
+
+    /**
+     * put long preferences
+     *
+     * @param context
+     * @param key The name of the preference to modify
+     * @param value The new value for the preference
+     * @return True if the new values were successfully written to persistent storage.
+     */
+    public static boolean putLong(Context context, String key, long value) {
+        SharedPreferences settings = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(key, value);
+        return editor.commit();
+    }
+
+    /**
+     * get long preferences
+     *
+     * @param context
+     * @param key The name of the preference to retrieve
+     * @return The preference value if it exists, or -1. Throws ClassCastException if there is a preference with this
+     *         name that is not a long
+     * @see #getLong(Context, String, long)
+     */
+    public static long getLong(Context context, String key) {
+        return getLong(context, key, -1);
+    }
+
+    /**
+     * get long preferences
+     *
+     * @param context
+     * @param key The name of the preference to retrieve
+     * @param defaultValue Value to return if this preference does not exist
+     * @return The preference value if it exists, or defValue. Throws ClassCastException if there is a preference with
+     *         this name that is not a long
+     */
+    public static long getLong(Context context, String key, long defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
+        return settings.getLong(key, defaultValue);
+    }
+
 }

@@ -57,7 +57,6 @@ import com.naman14.timber.utils.Constants;
 import com.naman14.timber.utils.Helpers;
 import com.naman14.timber.utils.NavigationUtils;
 import com.naman14.timber.utils.PreferencesUtility;
-import com.naman14.timber.utils.SharedPreferencesUtil;
 import com.naman14.timber.utils.TimberUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -235,13 +234,13 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
             loadEverything();
         }
 
-        long alarmTime = SharedPreferencesUtil.getLong(getApplicationContext() , ALARM_TIME_MS , 0L);
+        long alarmTime = PreferencesUtility.getLong(getApplicationContext(), ALARM_TIME_MS, 0L);
 
-        if ( alarmTime != 0L){
+        if (alarmTime != 0L) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(alarmTime);
 
-            updateMenuAlarmTitle(getAlarmString(calendar.get(Calendar.HOUR_OF_DAY) , calendar.get(Calendar.MINUTE)));
+            updateMenuAlarmTitle(getAlarmString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         }
 
     }
@@ -512,9 +511,9 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
     private void setAlarm() {
 
         Calendar now = Calendar.getInstance();
-        long alarmTime = SharedPreferencesUtil.getLong(getApplicationContext(), ALARM_TIME_MS, 0L);
+        long alarmTime = PreferencesUtility.getLong(getApplicationContext(), ALARM_TIME_MS, 0L);
 
-        if ( alarmTime != 0L){
+        if (alarmTime != 0L) {
             now.setTimeInMillis(alarmTime);
         }
 
@@ -549,36 +548,28 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         String time = getAlarmString(hourOfDay, minute);
         Log.d(TAG, "You picked the following time: " + time);
 
-        //是设置日历的时间，主要是让日历的年月日和当前同步
-                calendar.setTimeInMillis(System.currentTimeMillis());
-                //设置小时分钟，秒和毫秒都设置为0
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
 
-        if (calendar.getTime().before(new Date())){
-            calendar.add(Calendar.DAY_OF_YEAR , 1 );
+        if (calendar.getTime().before(new Date())) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
         Log.d(TAG, calendar.getTime() + "    saved");
-        // 保存定时的毫秒数
-        SharedPreferencesUtil.putLong(getApplicationContext(), ALARM_TIME_MS, calendar.getTimeInMillis());
+        PreferencesUtility.putLong(getApplicationContext(), ALARM_TIME_MS, calendar.getTimeInMillis());
 
-        int requestCode = 0;//闹钟的唯一标示
+        int requestCode = 0;
         Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
         intent.setAction(MainActivity.class.getName());
         intent.putExtra("requestCode", requestCode);
         PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, requestCode, intent, 0);
-        //得到AlarmManager实例
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        /**
-         * 第一个参数是警报类型；第二个参数是第一次执行的延迟时间，可以延迟，也可以马上执行；第三个参数是重复周期为一天
-         * 这句话的意思是设置闹铃重复周期，也就是执行警报的间隔时间
-         */
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                 (24 * 60 * 60 * 1000), pi);
-        Toast.makeText(MainActivity.this, "当前设置的每天闹钟时间：" + time, Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, getString(R.string.alarm_on_set) + time, Toast.LENGTH_LONG).show();
 
         updateMenuAlarmTitle(time);
 
@@ -598,10 +589,9 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, 0,
                 intent, 0);
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        //取消警报
         am.cancel(pi);
 
-        SharedPreferencesUtil.putLong(getApplicationContext() , ALARM_TIME_MS , 0L);
+        PreferencesUtility.putLong(getApplicationContext(), ALARM_TIME_MS, 0L);
 
         updateMenuAlarmTitle("");
 
@@ -634,7 +624,6 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         protected void onPreExecute() {
         }
     }
-
 
 
 }

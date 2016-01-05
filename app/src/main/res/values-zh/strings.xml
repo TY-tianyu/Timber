@@ -76,6 +76,7 @@
     <string name="alarm">闹钟</string>
     <string name="cancel_alarm">闹钟取消</string>
     <string name="time_picker_title">选择每天的启动时间</string>
+    <string name="alarm_on_set">当前设置的每天闹钟时间：</string>
 
 
 </resources>
