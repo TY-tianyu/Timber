@@ -9,3 +9,5 @@
 /app/app-release.apk
 app/app.iml
 app/manifest-merger-release-report.txt
+
+gradle/wrapper/gradle-wrapper.properties
