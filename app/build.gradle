@@ -2,27 +2,43 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
+<<<<<<< HEAD
     buildToolsVersion "23.0.2"
+=======
+    buildToolsVersion '23.0.2'
+>>>>>>> naman14/master
 
     defaultConfig {
         applicationId "naman14.timber"
         minSdkVersion 16
+<<<<<<< HEAD
         targetSdkVersion 19
         versionCode 7
         versionName "0.13b"
         renderscriptTargetApi 19
+=======
+        targetSdkVersion 23
+        versionCode 9
+        versionName "0.15b"
+        //renderscript support mode is not supported for 21+ with gradle version 2.0
+        renderscriptTargetApi 20
+>>>>>>> naman14/master
         renderscriptSupportModeEnabled true
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug{
+        debug {
             versionNameSuffix "-debug"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    lintOptions {
+        disable 'MissingTranslation'
+        disable 'ExtraTranslation'
     }
 
 }
@@ -45,9 +61,23 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.3.0'
     compile 'com.squareup.okhttp:okhttp:2.3.0'
     compile 'com.google.code.gson:gson:2.3'
+<<<<<<< HEAD
     compile('com.github.afollestad.material-dialogs:core:0.8.5.3@aar') {
         transitive = true
     }
 
     compile 'com.wdullaer:materialdatetimepicker:2.1.1'
+=======
+    compile 'de.Maxr1998:track-selector-lib:1.1'
+
+    compile('com.github.afollestad.material-dialogs:core:0.8.5.3@aar') {
+        transitive = true
+    }
+    compile('com.github.naman14:app-theme-engine:-SNAPSHOT@aar') {
+        transitive = true
+    }
+    compile('com.github.afollestad.material-dialogs:commons:0.8.5.3@aar') {
+        transitive = true
+    }
+>>>>>>> naman14/master
 }

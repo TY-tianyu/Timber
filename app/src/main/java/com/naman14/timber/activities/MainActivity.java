@@ -15,6 +15,7 @@
 package com.naman14.timber.activities;
 
 import android.Manifest;
+<<<<<<< HEAD
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -22,15 +23,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+=======
+import android.content.Intent;
+>>>>>>> naman14/master
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
+=======
+import android.preference.PreferenceManager;
+>>>>>>> naman14/master
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -41,7 +49,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+<<<<<<< HEAD
 import com.naman14.timber.AlarmReceiver;
+=======
+import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+>>>>>>> naman14/master
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.fragments.AlbumDetailFragment;
@@ -52,11 +64,9 @@ import com.naman14.timber.fragments.QueueFragment;
 import com.naman14.timber.permissions.Nammu;
 import com.naman14.timber.permissions.PermissionCallback;
 import com.naman14.timber.slidinguppanel.SlidingUpPanelLayout;
-import com.naman14.timber.subfragments.QuickControlsFragment;
 import com.naman14.timber.utils.Constants;
 import com.naman14.timber.utils.Helpers;
 import com.naman14.timber.utils.NavigationUtils;
-import com.naman14.timber.utils.PreferencesUtility;
 import com.naman14.timber.utils.TimberUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -68,17 +78,25 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+<<<<<<< HEAD
 public class MainActivity extends BaseActivity implements TimePickerDialog.OnTimeSetListener {
+=======
+public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer {
+>>>>>>> naman14/master
 
     public static final String TAG = "MainActivity";
 
+<<<<<<< HEAD
     public static final String ALARM_TIME_MS = "ALARM_TIME_MS";
 
+=======
+>>>>>>> naman14/master
     private static MainActivity sMainActivity;
     SlidingUpPanelLayout panelLayout;
     NavigationView navigationView;
     TextView songtitle, songartist;
     ImageView albumart;
+<<<<<<< HEAD
     Calendar calendar = Calendar.getInstance();
     String action;
     Map<String, Runnable> navigationMap = new HashMap<String, Runnable>();
@@ -116,10 +134,17 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
             panelLayout.setPanelHeight(0);
         }
     };
+=======
+    String action;
+    Map<String, Runnable> navigationMap = new HashMap<String, Runnable>();
+    Handler navDrawerRunnable = new Handler();
+    Runnable runnable;
+>>>>>>> naman14/master
     Runnable navigateLibrary = new Runnable() {
         public void run() {
             navigationView.getMenu().findItem(R.id.nav_library).setChecked(true);
             Fragment fragment = new MainFragment();
+<<<<<<< HEAD
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
@@ -147,10 +172,45 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
 
         }
     };
+=======
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
+
+        }
+    };
+    Runnable navigateNowplaying = new Runnable() {
+        public void run() {
+            navigateLibrary.run();
+            startActivity(new Intent(MainActivity.this, NowPlayingActivity.class));
+        }
+    };
+    final PermissionCallback permissionReadstorageCallback = new PermissionCallback() {
+        @Override
+        public void permissionGranted() {
+            loadEverything();
+        }
+
+        @Override
+        public void permissionRefused() {
+            finish();
+        }
+    };
+    Runnable navigatePlaylist = new Runnable() {
+        public void run() {
+            navigationView.getMenu().findItem(R.id.nav_playlists).setChecked(true);
+            Fragment fragment = new PlaylistFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
+            transaction.replace(R.id.fragment_container, fragment).commit();
+
+        }
+    };
+>>>>>>> naman14/master
     Runnable navigateQueue = new Runnable() {
         public void run() {
             navigationView.getMenu().findItem(R.id.nav_queue).setChecked(true);
             Fragment fragment = new QueueFragment();
+<<<<<<< HEAD
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, fragment).commit();
@@ -161,10 +221,37 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
     private boolean isLightTheme;
     private boolean isDarkTheme;
     private boolean isNavigatingMain = true;
+=======
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
+            transaction.replace(R.id.fragment_container, fragment).commit();
+
+        }
+    };
+    Runnable navigateAlbum = new Runnable() {
+        public void run() {
+            long albumID = getIntent().getExtras().getLong(Constants.ALBUM_ID);
+            Fragment fragment = AlbumDetailFragment.newInstance(albumID, false, null);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, fragment).commit();
+        }
+    };
+    Runnable navigateArtist = new Runnable() {
+        public void run() {
+            long artistID = getIntent().getExtras().getLong(Constants.ARTIST_ID);
+            Fragment fragment = ArtistDetailFragment.newInstance(artistID, false, null);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, fragment).commit();
+        }
+    };
+    private DrawerLayout mDrawerLayout;
+    private boolean isDarkTheme;
+>>>>>>> naman14/master
 
     public static MainActivity getInstance() {
         return sMainActivity;
-
     }
 
     @Override
@@ -174,38 +261,17 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         sMainActivity = this;
         action = getIntent().getAction();
 
-        isLightTheme = PreferencesUtility.getInstance(this).getTheme().equals("light");
-        isDarkTheme = PreferencesUtility.getInstance(this).getTheme().equals("dark");
+        isDarkTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false);
 
-        if (action.equals(Constants.NAVIGATE_ALBUM) || action.equals(Constants.NAVIGATE_ARTIST) || action.equals(Constants.NAVIGATE_NOWPLAYING)) {
-            isNavigatingMain = false;
-        } else {
-            isNavigatingMain = true;
-        }
-
-        if (!isNavigatingMain) {
-            if (isLightTheme)
-                setTheme(R.style.AppTheme_FullScreen_Light);
-            else if (isDarkTheme) setTheme(R.style.AppTheme_FullScreen_Dark);
-            else setTheme(R.style.AppTheme_FullScreen_Black);
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main_fullscreen);
-        } else {
-            if (isLightTheme)
-                setTheme(R.style.AppThemeLight);
-            else if (isDarkTheme) setTheme(R.style.AppThemeDark);
-            else setTheme(R.style.AppThemeBlack);
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-        }
-
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         navigationMap.put(Constants.NAVIGATE_LIBRARY, navigateLibrary);
         navigationMap.put(Constants.NAVIGATE_PLAYLIST, navigatePlaylist);
         navigationMap.put(Constants.NAVIGATE_QUEUE, navigateQueue);
+        navigationMap.put(Constants.NAVIGATE_NOWPLAYING, navigateNowplaying);
         navigationMap.put(Constants.NAVIGATE_ALBUM, navigateAlbum);
         navigationMap.put(Constants.NAVIGATE_ARTIST, navigateArtist);
-        navigationMap.put(Constants.NAVIGATE_NOWPLAYING, navigateNowplaying);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         panelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
@@ -217,7 +283,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         songtitle = (TextView) header.findViewById(R.id.song_title);
         songartist = (TextView) header.findViewById(R.id.song_artist);
 
-        setPanelSlideListeners();
+        setPanelSlideListeners(panelLayout);
 
         navDrawerRunnable.postDelayed(new Runnable() {
             @Override
@@ -234,6 +300,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
             loadEverything();
         }
 
+<<<<<<< HEAD
         long alarmTime = PreferencesUtility.getLong(getApplicationContext(), ALARM_TIME_MS, 0L);
 
         if (alarmTime != 0L) {
@@ -242,7 +309,22 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
 
             updateMenuAlarmTitle(getAlarmString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         }
+=======
+        addBackstackListener();
+>>>>>>> naman14/master
 
+        if(Intent.ACTION_VIEW.equals(action)) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    MusicPlayer.clearQueue();
+                    MusicPlayer.openFile(getIntent().getData().getPath());
+                    MusicPlayer.playOrPause();
+                    navigateNowplaying.run();
+                }
+            }, 350);
+        }
     }
 
     private void loadEverything() {
@@ -278,15 +360,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        if (action.equals(Constants.NAVIGATE_NOWPLAYING)) {
-            menu.findItem(R.id.action_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        } else {
-            menu.findItem(R.id.action_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        }
-        if (!TimberUtils.hasEffectsPanel(MainActivity.this)) {
-            menu.removeItem(R.id.action_equalizer);
-        }
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 
@@ -298,31 +372,12 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                if (!(action.equals(Constants.NAVIGATE_ALBUM) || action.equals(Constants.NAVIGATE_ARTIST) || action.equals(Constants.NAVIGATE_NOWPLAYING)))
+            case android.R.id.home: {
+                if (isNavigatingMain()) {
                     mDrawerLayout.openDrawer(GravityCompat.START);
-                else super.onBackPressed();
+                } else super.onBackPressed();
                 return true;
-            case R.id.action_settings:
-                NavigationUtils.navigateToSettings(this);
-                return true;
-            case R.id.action_shuffle:
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        MusicPlayer.shuffleAll(MainActivity.this);
-                    }
-                }, 80);
-
-                return true;
-            case R.id.action_search:
-                NavigationUtils.navigateToSearch(this);
-                return true;
-            case R.id.action_equalizer:
-                NavigationUtils.navigateToEqualizer(this);
-                return true;
-
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -332,10 +387,15 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
 
         if (panelLayout.isPanelExpanded())
             panelLayout.collapsePanel();
-        else
+        else {
             super.onBackPressed();
+        }
+
+<<<<<<< HEAD
+=======
     }
 
+>>>>>>> naman14/master
     private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -354,7 +414,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         //set icons manually for now
         //https://github.com/code-mc/material-icon-lib/issues/15
 
-        if (isLightTheme) {
+        if (!isDarkTheme) {
             navigationView.getMenu().findItem(R.id.nav_library).setIcon(R.drawable.library_music);
             navigationView.getMenu().findItem(R.id.nav_playlists).setIcon(R.drawable.playlist_play);
             navigationView.getMenu().findItem(R.id.nav_queue).setIcon(R.drawable.music_note);
@@ -376,29 +436,23 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
     }
 
     private void updatePosition(final MenuItem menuItem) {
-        Fragment fragment = null;
+        runnable = null;
 
         switch (menuItem.getItemId()) {
             case R.id.nav_library:
-                if (isNavigatingMain)
-                    fragment = new MainFragment();
-                else
-                    NavigationUtils.navigateToMainActivityWithFragment(MainActivity.this, Constants.NAVIGATE_LIBRARY);
+                runnable = navigateLibrary;
+
                 break;
             case R.id.nav_playlists:
-                if (isNavigatingMain)
-                    fragment = new PlaylistFragment();
-                else
-                    NavigationUtils.navigateToMainActivityWithFragment(MainActivity.this, Constants.NAVIGATE_PLAYLIST);
+                runnable = navigatePlaylist;
+
                 break;
             case R.id.nav_nowplaying:
                 NavigationUtils.navigateToNowplaying(MainActivity.this, false);
                 break;
             case R.id.nav_queue:
-                if (isNavigatingMain)
-                    fragment = new QueueFragment();
-                else
-                    NavigationUtils.navigateToMainActivityWithFragment(MainActivity.this, Constants.NAVIGATE_QUEUE);
+                runnable = navigateQueue;
+
                 break;
             case R.id.nav_alarm:
 
@@ -427,17 +481,14 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
                 break;
         }
 
-        if (fragment != null) {
+        if (runnable != null) {
             menuItem.setChecked(true);
             mDrawerLayout.closeDrawers();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            final android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment);
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    transaction.commit();
+                    runnable.run();
                 }
             }, 350);
         }
@@ -464,6 +515,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         setDetailsToHeader();
     }
 
+<<<<<<< HEAD
     private void setPanelSlideListeners() {
         panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
@@ -497,6 +549,8 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
         });
     }
 
+=======
+>>>>>>> naman14/master
     @Override
     public void onResume() {
         super.onResume();
@@ -504,6 +558,7 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
     }
 
     @Override
+<<<<<<< HEAD
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         Nammu.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -619,12 +674,36 @@ public class MainActivity extends BaseActivity implements TimePickerDialog.OnTim
                 }
             });
         }
+=======
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
+        Nammu.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+>>>>>>> naman14/master
 
-        @Override
-        protected void onPreExecute() {
-        }
+    private boolean isNavigatingMain() {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        return (currentFragment instanceof MainFragment || currentFragment instanceof QueueFragment
+                || currentFragment instanceof PlaylistFragment);
     }
 
+<<<<<<< HEAD
+=======
+    private void addBackstackListener() {
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                getSupportFragmentManager().findFragmentById(R.id.fragment_container).onResume();
+            }
+        });
+    }
+
+
+    @Override
+    public int getActivityTheme() {
+        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
+    }
+>>>>>>> naman14/master
 
 }
 
