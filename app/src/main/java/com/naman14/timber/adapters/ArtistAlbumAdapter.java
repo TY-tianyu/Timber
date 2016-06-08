@@ -31,6 +31,7 @@ import com.naman14.timber.utils.TimberUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArtistAlbumAdapter extends RecyclerView.Adapter<ArtistAlbumAdapter.ItemHolder> {
@@ -66,9 +67,6 @@ public class ArtistAlbumAdapter extends RecyclerView.Adapter<ArtistAlbumAdapter.
                         .resetViewBeforeLoading(true)
                         .build());
 
-        if (TimberUtils.isLollipop())
-            itemHolder.albumArt.setTransitionName("transition_album_art" + i);
-
     }
 
     @Override
@@ -93,8 +91,9 @@ public class ArtistAlbumAdapter extends RecyclerView.Adapter<ArtistAlbumAdapter.
 
         @Override
         public void onClick(View v) {
-            NavigationUtils.navigateToAlbum(mContext, arraylist.get(getAdapterPosition()).id,
-                    new Pair<View, String>(albumArt, "transition_album_art" + getAdapterPosition()));
+            ArrayList<Pair> tranitionViews = new ArrayList<>();
+            tranitionViews.add(0, Pair.create((View) albumArt, "transition_album_art"));
+            NavigationUtils.navigateToAlbum(mContext, arraylist.get(getAdapterPosition()).id, tranitionViews);
         }
 
     }

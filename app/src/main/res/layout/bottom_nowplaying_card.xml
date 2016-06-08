@@ -31,7 +31,7 @@
             android:layout_gravity="top"
             android:maxHeight="5dp"
             android:progress="30"
-            android:tag="tint_accent_color" />
+            android:progressDrawable="?attr/progressDrawable" />
 
         <TextView
             android:id="@+id/title"

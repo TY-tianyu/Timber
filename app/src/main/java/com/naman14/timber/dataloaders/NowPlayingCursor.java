@@ -189,6 +189,8 @@ public class NowPlayingCursor extends AbstractCursor {
         super.close();
     }
 
+    ;
+
 
     private void makeNowPlayingCursor() {
         mQueueCursor = null;

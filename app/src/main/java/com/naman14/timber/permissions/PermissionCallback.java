@@ -25,7 +25,7 @@
 package com.naman14.timber.permissions;
 
 public interface PermissionCallback {
-    void permissionGranted();
+    public void permissionGranted();
 
-    void permissionRefused();
+    public void permissionRefused();
 }

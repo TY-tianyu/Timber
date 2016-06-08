@@ -35,15 +35,16 @@ import java.util.List;
 
 public class Timber4QueueAdapter extends RecyclerView.Adapter<Timber4QueueAdapter.ItemHolder> {
 
-    public static int currentlyPlayingPosition;
     private List<Song> arraylist;
     private Activity mContext;
+    public static int currentlyPlayingPosition;
+
     private int lastPosition = -1;
 
     public Timber4QueueAdapter(Activity context, List<Song> arraylist) {
         this.arraylist = arraylist;
         this.mContext = context;
-        currentlyPlayingPosition = MusicPlayer.getQueuePosition();
+        this.currentlyPlayingPosition = MusicPlayer.getQueuePosition();
     }
 
     @Override
@@ -68,23 +69,6 @@ public class Timber4QueueAdapter extends RecyclerView.Adapter<Timber4QueueAdapte
         return (null != arraylist ? arraylist.size() : 0);
     }
 
-    public long[] getSongIds() {
-        long[] ret = new long[getItemCount()];
-        for (int i = 0; i < getItemCount(); i++) {
-            ret[i] = arraylist.get(i).id;
-        }
-
-        return ret;
-    }
-
-    private void setAnimation(View viewToAnimate, int position) {
-        // If the bound view wasn't previously displayed on screen, it's animated
-        if (position > lastPosition) {
-            Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.scale);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }
 
     public class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected ImageView albumArt;
@@ -121,6 +105,24 @@ public class Timber4QueueAdapter extends RecyclerView.Adapter<Timber4QueueAdapte
 
         }
 
+    }
+
+    public long[] getSongIds() {
+        long[] ret = new long[getItemCount()];
+        for (int i = 0; i < getItemCount(); i++) {
+            ret[i] = arraylist.get(i).id;
+        }
+
+        return ret;
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition) {
+            Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.scale);
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
     }
 
 

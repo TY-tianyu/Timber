@@ -34,8 +34,8 @@
                 android:layout_gravity="top"
                 android:layout_marginTop="@dimen/appBarTopMargin"
                 android:background="@android:color/transparent"
-                android:theme="@style/Theme.AppCompat"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                android:theme="@style/Theme.AppCompat" />
 
         </FrameLayout>
 
@@ -109,13 +109,14 @@
 
             <SeekBar
                 android:id="@+id/song_progress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:maxHeight="2dp"
                 android:paddingTop="10dp"
                 android:progress="30"
-                android:tag="tint_accent_color" />
+                android:progressDrawable="?attr/progressDrawableWithBackground" />
 
 
             <TextView
@@ -132,15 +133,17 @@
                     android:id="@+id/song_elapsed_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:paddingLeft="25dp" />
+                    android:textColor="#000000"
+                    android:paddingLeft="25dp"
+                    android:layout_alignParentLeft="true" />
 
                 <TextView
                     android:id="@+id/song_duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:paddingRight="25dp" />
+                    android:textColor="#000000"
+                    android:paddingRight="25dp"
+                    android:layout_alignParentRight="true" />
             </RelativeLayout>
 
 
@@ -180,7 +183,7 @@
                         android:layout_gravity="center"
                         android:clickable="true"
                         android:scaleType="fitCenter"
-                        android:tag="bg_tint_accent_color" />
+                        app:backgroundTint="?attr/accentColor" />
                 </FrameLayout>
 
                 <net.steamcrafted.materialiconlib.MaterialIconView

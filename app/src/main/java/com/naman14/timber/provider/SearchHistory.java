@@ -35,13 +35,6 @@ public class SearchHistory {
         mMusicDatabase = MusicDB.getInstance(context);
     }
 
-    public static final synchronized SearchHistory getInstance(final Context context) {
-        if (sInstance == null) {
-            sInstance = new SearchHistory(context.getApplicationContext());
-        }
-        return sInstance;
-    }
-
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + SearchHistoryColumns.NAME + " ("
                 + SearchHistoryColumns.SEARCHSTRING + " STRING NOT NULL,"
@@ -54,6 +47,14 @@ public class SearchHistory {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + SearchHistoryColumns.NAME);
         onCreate(db);
+    }
+
+
+    public static final synchronized SearchHistory getInstance(final Context context) {
+        if (sInstance == null) {
+            sInstance = new SearchHistory(context.getApplicationContext());
+        }
+        return sInstance;
     }
 
     public void addSearchString(final String searchString) {
@@ -141,12 +142,12 @@ public class SearchHistory {
 
     public interface SearchHistoryColumns {
         /* Table name */
-        String NAME = "searchhistory";
+        public static final String NAME = "searchhistory";
 
         /* What was searched */
-        String SEARCHSTRING = "searchstring";
+        public static final String SEARCHSTRING = "searchstring";
 
         /* Time of search */
-        String TIMESEARCHED = "timesearched";
+        public static final String TIMESEARCHED = "timesearched";
     }
 }

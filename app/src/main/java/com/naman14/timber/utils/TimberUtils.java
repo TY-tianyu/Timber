@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
@@ -114,26 +113,7 @@ public class TimberUtils {
         return 0;
     }
 
-    public static boolean hasEffectsPanel(final Activity activity) {
-        final PackageManager packageManager = activity.getPackageManager();
-        return packageManager.resolveActivity(createEffectsIntent(),
-                PackageManager.MATCH_DEFAULT_ONLY) != null;
-    }
-
-    public static Intent createEffectsIntent() {
-        final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-        effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MusicPlayer.getAudioSessionId());
-        return effects;
-    }
-
-    public static int getBlackWhiteColor(int color) {
-        double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255;
-        if (darkness >= 0.5) {
-            return Color.WHITE;
-        } else return Color.BLACK;
-    }
-
-    public enum IdType {
+    public static enum IdType {
         NA(0),
         Artist(1),
         Album(2),
@@ -156,7 +136,7 @@ public class TimberUtils {
         }
     }
 
-    public enum PlaylistType {
+    public static enum PlaylistType {
         LastAdded(-1, R.string.playlist_last_added),
         RecentlyPlayed(-2, R.string.playlist_recently_played),
         TopTracks(-3, R.string.playlist_top_tracks);
@@ -178,6 +158,18 @@ public class TimberUtils {
 
             return null;
         }
+    }
+
+    public static boolean hasEffectsPanel(final Activity activity) {
+        final PackageManager packageManager = activity.getPackageManager();
+        return packageManager.resolveActivity(createEffectsIntent(),
+                PackageManager.MATCH_DEFAULT_ONLY) != null;
+    }
+
+    public static Intent createEffectsIntent() {
+        final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MusicPlayer.getAudioSessionId());
+        return effects;
     }
 
 

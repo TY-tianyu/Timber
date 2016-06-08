@@ -96,10 +96,10 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.It
                                 MusicPlayer.playNext(mContext, ids, -1, TimberUtils.IdType.NA);
                                 break;
                             case R.id.popup_song_goto_album:
-                                NavigationUtils.goToAlbum(mContext, arraylist.get(position).albumId);
+                                NavigationUtils.navigateToAlbum(mContext, arraylist.get(position).albumId, null);
                                 break;
                             case R.id.popup_song_goto_artist:
-                                NavigationUtils.goToArtist(mContext, arraylist.get(position).artistId);
+                                NavigationUtils.navigateToArtist(mContext, arraylist.get(position).artistId, null);
                                 break;
                             case R.id.popup_song_addto_queue:
                                 long[] id = new long[1];
@@ -124,19 +124,6 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.It
         return (null != arraylist ? arraylist.size() : 0);
     }
 
-    public long[] getSongIds() {
-        long[] ret = new long[getItemCount()];
-        for (int i = 0; i < getItemCount(); i++) {
-            ret[i] = arraylist.get(i).id;
-        }
-
-        return ret;
-    }
-
-    public void updateDataSet(List<Song> arraylist) {
-        this.arraylist = arraylist;
-        this.songIDs = getSongIds();
-    }
 
     public class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected TextView title, duration, trackNumber;
@@ -164,6 +151,20 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.It
 
         }
 
+    }
+
+    public long[] getSongIds() {
+        long[] ret = new long[getItemCount()];
+        for (int i = 0; i < getItemCount(); i++) {
+            ret[i] = arraylist.get(i).id;
+        }
+
+        return ret;
+    }
+
+    public void updateDataSet(List<Song> arraylist) {
+        this.arraylist = arraylist;
+        this.songIDs = getSongIds();
     }
 
 }

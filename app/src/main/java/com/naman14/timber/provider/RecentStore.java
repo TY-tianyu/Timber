@@ -33,13 +33,6 @@ public class RecentStore {
         mMusicDatabase = MusicDB.getInstance(context);
     }
 
-    public static final synchronized RecentStore getInstance(final Context context) {
-        if (sInstance == null) {
-            sInstance = new RecentStore(context.getApplicationContext());
-        }
-        return sInstance;
-    }
-
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + RecentStoreColumns.NAME + " ("
                 + RecentStoreColumns.ID + " LONG NOT NULL," + RecentStoreColumns.TIMEPLAYED
@@ -52,6 +45,14 @@ public class RecentStore {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + RecentStoreColumns.NAME);
         onCreate(db);
+    }
+
+
+    public static final synchronized RecentStore getInstance(final Context context) {
+        if (sInstance == null) {
+            sInstance = new RecentStore(context.getApplicationContext());
+        }
+        return sInstance;
     }
 
     public void addSongId(final long songId) {
@@ -132,12 +133,12 @@ public class RecentStore {
 
     public interface RecentStoreColumns {
         /* Table name */
-        String NAME = "recenthistory";
+        public static final String NAME = "recenthistory";
 
         /* Album IDs column */
-        String ID = "songid";
+        public static final String ID = "songid";
 
         /* Time played column */
-        String TIMEPLAYED = "timeplayed";
+        public static final String TIMEPLAYED = "timeplayed";
     }
 }

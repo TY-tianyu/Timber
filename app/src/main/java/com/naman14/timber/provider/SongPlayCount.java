@@ -31,18 +31,26 @@ import java.util.Iterator;
  * the top played tracks as well as the playlist images
  */
 public class SongPlayCount {
-    // how many weeks worth of playback to track
-    private static final int NUM_WEEKS = 52;
     private static SongPlayCount sInstance = null;
+
+    private MusicDB mMusicDatabase = null;
+
     // interpolator curve applied for measuring the curve
     private static Interpolator sInterpolator = new AccelerateInterpolator(1.5f);
+
+    // how many weeks worth of playback to track
+    private static final int NUM_WEEKS = 52;
+
     // how high to multiply the interpolation curve
     private static int INTERPOLATOR_HEIGHT = 50;
+
     // how high the base value is. The ratio of the Height to Base is what really matters
     private static int INTERPOLATOR_BASE = 25;
+
     private static int ONE_WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7;
+
     private static String WHERE_ID_EQUALS = SongPlayCountColumns.ID + "=?";
-    private MusicDB mMusicDatabase = null;
+
     // number of weeks since epoch time
     private int mNumberOfWeeksSinceEpoch;
 
@@ -61,70 +69,6 @@ public class SongPlayCount {
         mNumberOfWeeksSinceEpoch = (int) (msSinceEpoch / ONE_WEEK_IN_MS);
 
         mDatabaseUpdated = false;
-    }
-
-    /**
-     * @param context The {@link android.content.Context} to use
-     * @return A new instance of this class.
-     */
-    public static final synchronized SongPlayCount getInstance(final Context context) {
-        if (sInstance == null) {
-            sInstance = new SongPlayCount(context.getApplicationContext());
-        }
-        return sInstance;
-    }
-
-    /**
-     * Calculates the score of the song given the play counts
-     *
-     * @param playCounts an array of the # of times a song has been played for each week
-     *                   where playCounts[N] is the # of times it was played N weeks ago
-     * @return the score
-     */
-    private static float calculateScore(final int[] playCounts) {
-        if (playCounts == null) {
-            return 0;
-        }
-
-        float score = 0;
-        for (int i = 0; i < Math.min(playCounts.length, NUM_WEEKS); i++) {
-            score += playCounts[i] * getScoreMultiplierForWeek(i);
-        }
-
-        return score;
-    }
-
-    /**
-     * Gets the column name for each week #
-     *
-     * @param week number
-     * @return the column name
-     */
-    private static String getColumnNameForWeek(final int week) {
-        return SongPlayCountColumns.WEEK_PLAY_COUNT + String.valueOf(week);
-    }
-
-    /**
-     * Gets the score multiplier for each week
-     *
-     * @param week number
-     * @return the multiplier to apply
-     */
-    private static float getScoreMultiplierForWeek(final int week) {
-        return sInterpolator.getInterpolation(1 - (week / (float) NUM_WEEKS)) * INTERPOLATOR_HEIGHT
-                + INTERPOLATOR_BASE;
-    }
-
-    /**
-     * For some performance gain, return a static value for the column index for a week
-     * WARNIGN: This function assumes you have selected all columns for it to work
-     *
-     * @param week number
-     * @return column index of that week
-     */
-    private static int getColumnIndexForWeek(final int week) {
-        // ID, followed by the weeks columns
-        return 1 + week;
     }
 
     public void onCreate(final SQLiteDatabase db) {
@@ -160,6 +104,17 @@ public class SongPlayCount {
         // If we ever have downgrade, drop the table to be safe
         db.execSQL("DROP TABLE IF EXISTS " + SongPlayCountColumns.NAME);
         onCreate(db);
+    }
+
+    /**
+     * @param context The {@link android.content.Context} to use
+     * @return A new instance of this class.
+     */
+    public static final synchronized SongPlayCount getInstance(final Context context) {
+        if (sInstance == null) {
+            sInstance = new SongPlayCount(context.getApplicationContext());
+        }
+        return sInstance;
     }
 
     /**
@@ -458,21 +413,74 @@ public class SongPlayCount {
         database.delete(SongPlayCountColumns.NAME, WHERE_ID_EQUALS, new String[]{stringId});
     }
 
+    /**
+     * Calculates the score of the song given the play counts
+     *
+     * @param playCounts an array of the # of times a song has been played for each week
+     *                   where playCounts[N] is the # of times it was played N weeks ago
+     * @return the score
+     */
+    private static float calculateScore(final int[] playCounts) {
+        if (playCounts == null) {
+            return 0;
+        }
+
+        float score = 0;
+        for (int i = 0; i < Math.min(playCounts.length, NUM_WEEKS); i++) {
+            score += playCounts[i] * getScoreMultiplierForWeek(i);
+        }
+
+        return score;
+    }
+
+    /**
+     * Gets the column name for each week #
+     *
+     * @param week number
+     * @return the column name
+     */
+    private static String getColumnNameForWeek(final int week) {
+        return SongPlayCountColumns.WEEK_PLAY_COUNT + String.valueOf(week);
+    }
+
+    /**
+     * Gets the score multiplier for each week
+     *
+     * @param week number
+     * @return the multiplier to apply
+     */
+    private static float getScoreMultiplierForWeek(final int week) {
+        return sInterpolator.getInterpolation(1 - (week / (float) NUM_WEEKS)) * INTERPOLATOR_HEIGHT
+                + INTERPOLATOR_BASE;
+    }
+
+    /**
+     * For some performance gain, return a static value for the column index for a week
+     * WARNIGN: This function assumes you have selected all columns for it to work
+     *
+     * @param week number
+     * @return column index of that week
+     */
+    private static int getColumnIndexForWeek(final int week) {
+        // ID, followed by the weeks columns
+        return 1 + week;
+    }
+
     public interface SongPlayCountColumns {
 
         /* Table name */
-        String NAME = "songplaycount";
+        public static final String NAME = "songplaycount";
 
         /* Song IDs column */
-        String ID = "songid";
+        public static final String ID = "songid";
 
         /* Week Play Count */
-        String WEEK_PLAY_COUNT = "week";
+        public static final String WEEK_PLAY_COUNT = "week";
 
         /* Weeks since Epoch */
-        String LAST_UPDATED_WEEK_INDEX = "weekindex";
+        public static final String LAST_UPDATED_WEEK_INDEX = "weekindex";
 
         /* Play count */
-        String PLAYCOUNTSCORE = "playcountscore";
+        public static final String PLAYCOUNTSCORE = "playcountscore";
     }
 }

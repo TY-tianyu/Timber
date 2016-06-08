@@ -1,9 +1,4 @@
 #Changelog
-v0.14b-
-
-* Added Theme engine
-* Performance improvements
-* Many bugs fixed
 
 v0.13b-
 

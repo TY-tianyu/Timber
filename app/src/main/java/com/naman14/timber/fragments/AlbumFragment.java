@@ -65,8 +65,7 @@ public class AlbumFragment extends Fragment {
 
         setLayoutManager();
 
-        if (getActivity() != null)
-            new loadAlbums().execute("");
+        new loadAlbums().execute("");
         return rootView;
     }
 
@@ -97,7 +96,49 @@ public class AlbumFragment extends Fragment {
         recyclerView.setAdapter(new AlbumAdapter(getActivity(), AlbumLoader.getAllAlbums(getActivity())));
         layoutManager.setSpanCount(column);
         layoutManager.requestLayout();
-        setItemDecoration();
+    }
+
+    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
+        private int space;
+
+        public SpacesItemDecoration(int space) {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view,
+                                   RecyclerView parent, RecyclerView.State state) {
+
+
+            outRect.left = space;
+            outRect.top = space;
+            outRect.right = space;
+            outRect.bottom = space;
+
+        }
+    }
+
+    private class loadAlbums extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            mAdapter = new AlbumAdapter(getActivity(), AlbumLoader.getAllAlbums(getActivity()));
+            return "Executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            recyclerView.setAdapter(mAdapter);
+            //to add spacing between cards
+            if (getActivity() != null) {
+                setItemDecoration();
+            }
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
     }
 
     private void reloadAdapter() {
@@ -155,60 +196,14 @@ public class AlbumFragment extends Fragment {
                 return true;
             case R.id.menu_show_as_list:
                 mPreferences.setAlbumsInGrid(false);
-                isGrid = false;
                 updateLayoutManager(1);
                 return true;
             case R.id.menu_show_as_grid:
                 mPreferences.setAlbumsInGrid(true);
-                isGrid = true;
                 updateLayoutManager(2);
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
-        private int space;
-
-        public SpacesItemDecoration(int space) {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view,
-                                   RecyclerView parent, RecyclerView.State state) {
-
-
-            outRect.left = space;
-            outRect.top = space;
-            outRect.right = space;
-            outRect.bottom = space;
-
-        }
-    }
-
-    private class loadAlbums extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            if (getActivity() != null)
-                mAdapter = new AlbumAdapter(getActivity(), AlbumLoader.getAllAlbums(getActivity()));
-            return "Executed";
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            recyclerView.setAdapter(mAdapter);
-            //to add spacing between cards
-            if (getActivity() != null) {
-                setItemDecoration();
-            }
-
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
     }
 }
 

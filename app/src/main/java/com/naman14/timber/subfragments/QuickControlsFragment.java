@@ -15,28 +15,25 @@
 package com.naman14.timber.subfragments;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.activities.BaseActivity;
 import com.naman14.timber.listeners.MusicStateListener;
-import com.naman14.timber.utils.Helpers;
+import com.naman14.timber.nowplaying.BaseNowplayingFragment;
 import com.naman14.timber.utils.ImageUtils;
 import com.naman14.timber.utils.TimberUtils;
 import com.naman14.timber.widgets.PlayPauseButton;
@@ -45,68 +42,32 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
-import net.steamcrafted.materialiconlib.MaterialIconView;
-
-public class QuickControlsFragment extends Fragment implements MusicStateListener {
+public class QuickControlsFragment extends BaseNowplayingFragment implements MusicStateListener {
 
 
     public static View topContainer;
-    private ProgressBar mProgress;
-    private SeekBar mSeekBar;
-    public Runnable mUpdateProgress = new Runnable() {
-
-        @Override
-        public void run() {
-
-            long position = MusicPlayer.position();
-            mProgress.setProgress((int) position);
-            mSeekBar.setProgress((int) position);
-
-            if (MusicPlayer.isPlaying()) {
-                mProgress.postDelayed(mUpdateProgress, 50);
-            } else mProgress.removeCallbacks(this);
-
-        }
-    };
-    private PlayPauseButton mPlayPause, mPlayPauseExpanded;
-    private TextView mTitle, mTitleExpanded;
-    private TextView mArtist, mArtistExpanded;
+    private static ProgressBar mProgress;
+    private PlayPauseButton mPlayPause;
+    private TextView mTitle;
+    private TextView mArtist;
+    private TextView mExtraInfo;
     private ImageView mAlbumArt, mBlurredArt;
+    private String mArtUrl;
     private View rootView;
-    private View playPauseWrapper, playPauseWrapperExpanded;
-    private MaterialIconView previous, next;
+    private View playPauseWrapper;
+
     private boolean duetoplaypause = false;
-    private final View.OnClickListener mPlayPauseListener = new View.OnClickListener() {
+    private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             duetoplaypause = true;
+            ;
             if (!mPlayPause.isPlayed()) {
                 mPlayPause.setPlayed(true);
                 mPlayPause.startAnimation();
             } else {
                 mPlayPause.setPlayed(false);
                 mPlayPause.startAnimation();
-            }
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MusicPlayer.playOrPause();
-                }
-            }, 200);
-
-        }
-    };
-    private final View.OnClickListener mPlayPauseExpandedListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            duetoplaypause = true;
-            if (!mPlayPauseExpanded.isPlayed()) {
-                mPlayPauseExpanded.setPlayed(true);
-                mPlayPauseExpanded.startAnimation();
-            } else {
-                mPlayPauseExpanded.setPlayed(false);
-                mPlayPauseExpanded.startAnimation();
             }
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -126,87 +87,52 @@ public class QuickControlsFragment extends Fragment implements MusicStateListene
         this.rootView = rootView;
 
         mPlayPause = (PlayPauseButton) rootView.findViewById(R.id.play_pause);
-        mPlayPauseExpanded = (PlayPauseButton) rootView.findViewById(R.id.playpause);
         playPauseWrapper = rootView.findViewById(R.id.play_pause_wrapper);
-        playPauseWrapperExpanded = rootView.findViewById(R.id.playpausewrapper);
-        playPauseWrapper.setOnClickListener(mPlayPauseListener);
-        playPauseWrapperExpanded.setOnClickListener(mPlayPauseExpandedListener);
+        mPlayPause.setEnabled(true);
+        playPauseWrapper.setOnClickListener(mButtonListener);
         mProgress = (ProgressBar) rootView.findViewById(R.id.song_progress_normal);
-        mSeekBar = (SeekBar) rootView.findViewById(R.id.song_progress);
         mTitle = (TextView) rootView.findViewById(R.id.title);
         mArtist = (TextView) rootView.findViewById(R.id.artist);
-        mTitleExpanded = (TextView) rootView.findViewById(R.id.song_title);
-        mArtistExpanded = (TextView) rootView.findViewById(R.id.song_artist);
         mAlbumArt = (ImageView) rootView.findViewById(R.id.album_art_nowplayingcard);
         mBlurredArt = (ImageView) rootView.findViewById(R.id.blurredAlbumart);
-        next = (MaterialIconView) rootView.findViewById(R.id.next);
-        previous = (MaterialIconView) rootView.findViewById(R.id.previous);
         topContainer = rootView.findViewById(R.id.topContainer);
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mProgress.getLayoutParams();
         mProgress.measure(0, 0);
         layoutParams.setMargins(0, -(mProgress.getMeasuredHeight() / 2), 0, 0);
         mProgress.setLayoutParams(layoutParams);
+        mProgress.setScaleY(0.5f);
 
-        mPlayPause.setColor(Config.accentColor(getActivity(), Helpers.getATEKey(getActivity())));
-        mPlayPauseExpanded.setColor(Color.WHITE);
+        if (isThemeIsLight()) {
+            mPlayPause.setColor(ContextCompat.getColor(mPlayPause.getContext(), R.color.colorAccent));
+        } else if (isThemeIsDark()) {
+            mPlayPause.setColor(ContextCompat.getColor(mPlayPause.getContext(), R.color.colorAccentDarkTheme));
+        } else
+            mPlayPause.setColor(ContextCompat.getColor(mPlayPause.getContext(), R.color.colorAccentBlack));
 
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        rootView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (b) {
-                    MusicPlayer.seek((long) i);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        MusicPlayer.next();
-                    }
-                }, 200);
+            public void onClick(View v) {
 
             }
         });
-
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        MusicPlayer.previous(getActivity(), false);
-                    }
-                }, 200);
-
-            }
-        });
-
 
         ((BaseActivity) getActivity()).setMusicStateListenerListener(this);
+
 
         return rootView;
     }
 
+    public void updateControlsFragment() {
+        //let basenowplayingfragment take care of this
+        setSongDetails(rootView);
+
+    }
+
+    //to update the permanent now playing card at the bottom
     public void updateNowplayingCard() {
         mTitle.setText(MusicPlayer.getTrackName());
         mArtist.setText(MusicPlayer.getArtistName());
-        mTitleExpanded.setText(MusicPlayer.getTrackName());
-        mArtistExpanded.setText(MusicPlayer.getArtistName());
         if (!duetoplaypause) {
             ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString(), mAlbumArt,
                     new DisplayImageOptions.Builder().cacheInMemory(true)
@@ -239,9 +165,6 @@ public class QuickControlsFragment extends Fragment implements MusicStateListene
                     });
         }
         duetoplaypause = false;
-        mProgress.setMax((int) MusicPlayer.duration());
-        mSeekBar.setMax((int) MusicPlayer.duration());
-        mProgress.postDelayed(mUpdateProgress, 10);
     }
 
     @Override
@@ -269,18 +192,10 @@ public class QuickControlsFragment extends Fragment implements MusicStateListene
                 mPlayPause.setPlayed(true);
                 mPlayPause.startAnimation();
             }
-            if (!mPlayPauseExpanded.isPlayed()) {
-                mPlayPauseExpanded.setPlayed(true);
-                mPlayPauseExpanded.startAnimation();
-            }
         } else {
             if (mPlayPause.isPlayed()) {
                 mPlayPause.setPlayed(false);
                 mPlayPause.startAnimation();
-            }
-            if (mPlayPauseExpanded.isPlayed()) {
-                mPlayPauseExpanded.setPlayed(false);
-                mPlayPauseExpanded.startAnimation();
             }
         }
     }
@@ -294,8 +209,11 @@ public class QuickControlsFragment extends Fragment implements MusicStateListene
     }
 
     public void onMetaChanged() {
+        //only update nowplayingcard,quick controls will be updated by basenowplayingfragment's onMetaChanged
         updateNowplayingCard();
         updateState();
+        //TODO
+        updateControlsFragment();
     }
 
     private class setBlurredAlbumArt extends AsyncTask<Bitmap, Void, Drawable> {

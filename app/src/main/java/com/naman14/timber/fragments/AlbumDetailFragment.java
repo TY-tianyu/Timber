@@ -11,25 +11,30 @@
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  */
+
 package com.naman14.timber.fragments;
 
 import android.annotation.TargetApi;
-import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
 import android.transition.Transition;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,10 +42,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.adapters.AlbumSongsAdapter;
@@ -49,10 +54,8 @@ import com.naman14.timber.dataloaders.AlbumSongLoader;
 import com.naman14.timber.listeners.SimplelTransitionListener;
 import com.naman14.timber.models.Album;
 import com.naman14.timber.models.Song;
-import com.naman14.timber.utils.ATEUtils;
 import com.naman14.timber.utils.Constants;
 import com.naman14.timber.utils.FabAnimationUtils;
-import com.naman14.timber.utils.Helpers;
 import com.naman14.timber.utils.NavigationUtils;
 import com.naman14.timber.utils.PreferencesUtility;
 import com.naman14.timber.utils.SortOrder;
@@ -78,6 +81,7 @@ public class AlbumDetailFragment extends Fragment {
     AlbumSongsAdapter mAdapter;
 
     Toolbar toolbar;
+    CoordinatorLayout coordinatorLayout;
 
     Album album;
 
@@ -86,18 +90,15 @@ public class AlbumDetailFragment extends Fragment {
     FloatingActionButton fab;
 
     private boolean loadFailed = false;
+    private boolean isDarkTheme;
 
     private PreferencesUtility mPreferences;
-    private Context context;
-    private int primaryColor = -1;
 
-    public static AlbumDetailFragment newInstance(long id, boolean useTransition, String transitionName) {
+    public static AlbumDetailFragment newInstance(long id, boolean transition) {
         AlbumDetailFragment fragment = new AlbumDetailFragment();
         Bundle args = new Bundle();
         args.putLong(Constants.ALBUM_ID, id);
-        args.putBoolean("transition", useTransition);
-        if (useTransition)
-            args.putString("transition_name", transitionName);
+        args.putBoolean("transition", transition);
         fragment.setArguments(args);
         return fragment;
     }
@@ -108,8 +109,8 @@ public class AlbumDetailFragment extends Fragment {
         if (getArguments() != null) {
             albumID = getArguments().getLong(Constants.ALBUM_ID);
         }
-        context = getActivity();
-        mPreferences = PreferencesUtility.getInstance(context);
+        isDarkTheme = PreferencesUtility.getInstance(getActivity()).getTheme().equals("black");
+        mPreferences = PreferencesUtility.getInstance(getActivity());
     }
 
     @TargetApi(21)
@@ -127,9 +128,6 @@ public class AlbumDetailFragment extends Fragment {
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
-        if (getArguments().getBoolean("transition")) {
-            albumArt.setTransitionName(getArguments().getString("transition_name"));
-        }
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview);
         collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
         appBarLayout = (AppBarLayout) rootView.findViewById(R.id.app_bar);
@@ -140,8 +138,13 @@ public class AlbumDetailFragment extends Fragment {
 
         setAlbumart();
 
-        setUpEverything();
-
+        if (getArguments().getBoolean("transition")) {
+            getActivity().postponeEnterTransition();
+            getActivity().getWindow().getEnterTransition().addListener(new EnterTransitionListener());
+            getActivity().getWindow().getReturnTransition().addListener(new ReturnTransitionListener());
+        } else {
+            setUpEverything();
+        }
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,70 +186,49 @@ public class AlbumDetailFragment extends Fragment {
                     @Override
                     public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
                         loadFailed = true;
-                        MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(context)
-                                .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
-                                .setColor(TimberUtils.getBlackWhiteColor(Config.accentColor(context, Helpers.getATEKey(context))));
-                        ATEUtils.setFabBackgroundTint(fab, Config.accentColor(context, Helpers.getATEKey(context)));
-                        fab.setImageDrawable(builder.build());
+                        if (TimberUtils.isLollipop() && PreferencesUtility.getInstance(getActivity()).getAnimations())
+                            scheduleStartPostponedTransition(albumArt);
 
+
+                        if (isDarkTheme) {
+                            MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
+                                    .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
+                                    .setColor(Color.BLACK);
+                            fab.setImageDrawable(builder.build());
+
+                        }
                     }
 
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        try {
-                            new Palette.Builder(loadedImage).generate(new Palette.PaletteAsyncListener() {
-                                                                          @Override
-                                                                          public void onGenerated(Palette palette) {
-                                                                              Palette.Swatch swatch = palette.getVibrantSwatch();
-                                                                              if (swatch != null) {
-                                                                                  primaryColor = swatch.getRgb();
-                                                                                  collapsingToolbarLayout.setContentScrimColor(primaryColor);
-                                                                                  if (getActivity() != null)
-                                                                                      ATEUtils.setStatusBarColor(getActivity(), Helpers.getATEKey(getActivity()), primaryColor);
-                                                                              } else {
-                                                                                  Palette.Swatch swatchMuted = palette.getMutedSwatch();
-                                                                                  if (swatchMuted != null) {
-                                                                                      primaryColor = swatchMuted.getRgb();
-                                                                                      collapsingToolbarLayout.setContentScrimColor(primaryColor);
-                                                                                      if (getActivity() != null)
-                                                                                          ATEUtils.setStatusBarColor(getActivity(), Helpers.getATEKey(getActivity()), primaryColor);
-                                                                                  }
-                                                                              }
+                        new Palette.Builder(loadedImage).generate(new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(Palette palette) {
+                                collapsingToolbarLayout.setContentScrimColor(palette.getVibrantColor(Color.parseColor("#66000000")));
+                                collapsingToolbarLayout.setStatusBarScrimColor(palette.getDarkVibrantColor(Color.parseColor("#66000000")));
 
-                                                                              MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
-                                                                                      .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
-                                                                                      .setSizeDp(30);
-                                                                              if (primaryColor != -1) {
-                                                                                  builder.setColor(TimberUtils.getBlackWhiteColor(primaryColor));
-                                                                                  ATEUtils.setFabBackgroundTint(fab, primaryColor);
-                                                                                  fab.setImageDrawable(builder.build());
-                                                                              } else {
-                                                                                  if (context != null) {
-                                                                                      ATEUtils.setFabBackgroundTint(fab, Config.accentColor(context, Helpers.getATEKey(context)));
-                                                                                      builder.setColor(TimberUtils.getBlackWhiteColor(Config.accentColor(context, Helpers.getATEKey(context))));
-                                                                                      fab.setImageDrawable(builder.build());
-                                                                                  }
-                                                                              }
-                                                                          }
-                                                                      }
+                                ColorStateList fabColorStateList = new ColorStateList(
+                                        new int[][]{
+                                                new int[]{}
+                                        },
+                                        new int[]{
+                                                palette.getMutedColor(Color.parseColor("#66000000")),
+                                        }
+                                );
 
-                            );
-                        } catch (
-                                Exception ignored
-                                )
+                                fab.setBackgroundTintList(fabColorStateList);
+                            }
+                        });
 
-                        {
-
-                        }
+                        if (TimberUtils.isLollipop() && PreferencesUtility.getInstance(getActivity()).getAnimations())
+                            scheduleStartPostponedTransition(albumArt);
                     }
 
                     @Override
                     public void onLoadingCancelled(String imageUri, View view) {
                     }
 
-                }
-
-        );
+                });
     }
 
     private void setAlbumDetails() {
@@ -274,6 +256,14 @@ public class AlbumDetailFragment extends Fragment {
         setupToolbar();
         setAlbumDetails();
         setUpAlbumSongs();
+        FabAnimationUtils.scaleIn(fab);
+        MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
+                .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE);
+        if ((loadFailed && isDarkTheme))
+            builder.setColor(Color.BLACK);
+        else builder.setColor(Color.WHITE);
+        fab.setImageDrawable(builder.build());
+        enableViews();
     }
 
     private void reloadAdapter() {
@@ -331,30 +321,65 @@ public class AlbumDetailFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        toolbar.setBackgroundColor(Color.TRANSPARENT);
-        if (primaryColor != -1 && getActivity() != null) {
-            collapsingToolbarLayout.setContentScrimColor(primaryColor);
-            ATEUtils.setFabBackgroundTint(fab, primaryColor);
-            String ateKey = Helpers.getATEKey(getActivity());
-            ATEUtils.setStatusBarColor(getActivity(), ateKey, primaryColor);
-        }
 
+    private void enableViews() {
+        recyclerView.setEnabled(true);
+    }
+
+    private void disableView() {
+        recyclerView.setEnabled(false);
+    }
+
+    private void initActivityTransitions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Slide transition = new Slide();
+            transition.excludeTarget(android.R.id.statusBarBackground, true);
+            transition.excludeTarget(R.id.album_art, true);
+            transition.setInterpolator(new LinearOutSlowInInterpolator());
+            transition.setDuration(300);
+            getActivity().getWindow().setEnterTransition(transition);
+        }
+    }
+
+    @TargetApi(21)
+    private void scheduleStartPostponedTransition(final View sharedElement) {
+        sharedElement.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
+                        getActivity().startPostponedEnterTransition();
+                        return true;
+                    }
+                });
     }
 
     private class EnterTransitionListener extends SimplelTransitionListener {
 
         @TargetApi(21)
         public void onTransitionEnd(Transition paramTransition) {
-            FabAnimationUtils.scaleIn(fab);
+            setUpEverything();
         }
 
         public void onTransitionStart(Transition paramTransition) {
-            FabAnimationUtils.scaleOut(fab, 0, null);
+            FabAnimationUtils.scaleOut(fab, 50, null);
+            disableView();
         }
 
     }
+
+    private class ReturnTransitionListener extends SimplelTransitionListener {
+
+        @TargetApi(21)
+        public void onTransitionEnd(Transition paramTransition) {
+        }
+
+        public void onTransitionStart(Transition paramTransition) {
+            FabAnimationUtils.scaleOut(fab, 50, null);
+            disableView();
+        }
+
+    }
+
 
 }

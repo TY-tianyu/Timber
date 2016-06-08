@@ -28,11 +28,17 @@ import java.util.ArrayList;
 public class TopTracksLoader extends SongLoader {
 
     public static final int NUMBER_OF_SONGS = 99;
-    protected static QueryType mQueryType;
     private static Context mContext;
 
+    public enum QueryType {
+        TopTracks,
+        RecentSongs,
+    }
+
+    protected static QueryType mQueryType;
+
     public TopTracksLoader(final Context context, QueryType type) {
-        mContext = context;
+        this.mContext = context;
         mQueryType = type;
     }
 
@@ -60,6 +66,7 @@ public class TopTracksLoader extends SongLoader {
         return retCursor;
     }
 
+
     public static final SortedCursor makeTopTracksCursor(final Context context) {
 
         Cursor songs = SongPlayCount.getInstance(context).getTopPlayedResults(NUMBER_OF_SONGS);
@@ -75,6 +82,7 @@ public class TopTracksLoader extends SongLoader {
         }
     }
 
+
     public static final SortedCursor makeRecentTracksCursor(final Context context) {
 
         Cursor songs = RecentStore.getInstance(context).queryRecentIds(null);
@@ -89,6 +97,7 @@ public class TopTracksLoader extends SongLoader {
             }
         }
     }
+
 
     public static final SortedCursor makeSortedCursor(final Context context, final Cursor cursor,
                                                       final int idColumn) {
@@ -121,11 +130,5 @@ public class TopTracksLoader extends SongLoader {
         }
 
         return null;
-    }
-
-
-    public enum QueryType {
-        TopTracks,
-        RecentSongs,
     }
 }

@@ -49,15 +49,17 @@ import java.util.Random;
 public class PlaylistPagerFragment extends Fragment {
 
     private static final String ARG_PAGE_NUMBER = "pageNumber";
-    int[] foregroundColors = {R.color.pink_transparent, R.color.green_transparent, R.color.blue_transparent, R.color.red_transparent, R.color.purple_transparent};
     private int pageNumber, songCountInt;
     private int foregroundColor;
     private long firstAlbumID = -1;
+
     private Playlist playlist;
     private TextView playlistame, songcount, playlistnumber, playlisttype;
     private ImageView playlistImage;
     private View foreground;
     private Context mContext;
+
+    int[] foregroundColors = {R.color.pink_transparent, R.color.green_transparent, R.color.blue_transparent, R.color.red_transparent, R.color.purple_transparent};
 
     public static PlaylistPagerFragment newInstance(int pageNumber) {
         PlaylistPagerFragment fragment = new PlaylistPagerFragment();
@@ -90,7 +92,7 @@ public class PlaylistPagerFragment extends Fragment {
                 ArrayList<Pair> tranitionViews = new ArrayList<>();
                 tranitionViews.add(0, Pair.create((View) playlistame, "transition_playlist_name"));
                 tranitionViews.add(1, Pair.create((View) playlistImage, "transition_album_art"));
-                tranitionViews.add(2, Pair.create(foreground, "transition_foreground"));
+                tranitionViews.add(2, Pair.create((View) foreground, "transition_foreground"));
                 NavigationUtils.navigateToPlaylistDetail(getActivity(), getPlaylistType(), firstAlbumID, String.valueOf(playlistame.getText()), foregroundColor, playlist.id, tranitionViews);
             }
         });
@@ -161,7 +163,7 @@ public class PlaylistPagerFragment extends Fragment {
                         } else return "nosongs";
                     case 1:
                         TopTracksLoader recentloader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.RecentSongs);
-                        List<Song> recentsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
+                        List<Song> recentsongs = SongLoader.getSongsForCursor(recentloader.getCursor());
                         songCountInt = recentsongs.size();
 
                         if (songCountInt != 0) {
@@ -170,7 +172,7 @@ public class PlaylistPagerFragment extends Fragment {
                         } else return "nosongs";
                     case 2:
                         TopTracksLoader topTracksLoader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.TopTracks);
-                        List<Song> topsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
+                        List<Song> topsongs = SongLoader.getSongsForCursor(topTracksLoader.getCursor());
                         songCountInt = topsongs.size();
 
                         if (songCountInt != 0) {

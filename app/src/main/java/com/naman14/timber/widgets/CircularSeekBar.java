@@ -19,6 +19,16 @@ import com.naman14.timber.R;
 
 public class CircularSeekBar extends View {
 
+    /**
+     * Used to scale the dp units to pixels
+     */
+    private final float DPTOPX_SCALE = getResources().getDisplayMetrics().density;
+
+    /**
+     * Minimum touch target size in DP. 48dp is the Android design recommendation
+     */
+    private final float MIN_TOUCH_TARGET_DP = 48;
+
     // Default values
     private static final float DEFAULT_CIRCLE_X_RADIUS = 30f;
     private static final float DEFAULT_CIRCLE_Y_RADIUS = 30f;
@@ -42,14 +52,7 @@ public class CircularSeekBar extends View {
     private static final boolean DEFAULT_MAINTAIN_EQUAL_CIRCLE = true;
     private static final boolean DEFAULT_MOVE_OUTSIDE_CIRCLE = false;
     private static final boolean DEFAULT_LOCK_ENABLED = true;
-    /**
-     * Used to scale the dp units to pixels
-     */
-    private final float DPTOPX_SCALE = getResources().getDisplayMetrics().density;
-    /**
-     * Minimum touch target size in DP. 48dp is the Android design recommendation
-     */
-    private final float MIN_TOUCH_TARGET_DP = 48;
+
     /**
      * {@code Paint} instance used to draw the inactive circle.
      */
@@ -327,21 +330,6 @@ public class CircularSeekBar extends View {
      */
     private OnCircularSeekBarChangeListener mOnCircularSeekBarChangeListener;
 
-    public CircularSeekBar(Context context) {
-        super(context);
-        init(null, 0);
-    }
-
-    public CircularSeekBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
-    }
-
-    public CircularSeekBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(attrs, defStyle);
-    }
-
     /**
      * Initialize the CircularSeekBar with the attributes from the XML style.
      * Uses the defaults defined at the top of this file when an attribute is not specified by the user.
@@ -349,12 +337,12 @@ public class CircularSeekBar extends View {
      * @param attrArray TypedArray containing the attributes.
      */
     private void initAttributes(TypedArray attrArray) {
-        mCircleXRadius = attrArray.getFloat(R.styleable.CircularSeekBar_circle_x_radius, DEFAULT_CIRCLE_X_RADIUS) * DPTOPX_SCALE;
-        mCircleYRadius = attrArray.getFloat(R.styleable.CircularSeekBar_circle_y_radius, DEFAULT_CIRCLE_Y_RADIUS) * DPTOPX_SCALE;
-        mPointerRadius = attrArray.getFloat(R.styleable.CircularSeekBar_pointer_radius, DEFAULT_POINTER_RADIUS) * DPTOPX_SCALE;
-        mPointerHaloWidth = attrArray.getFloat(R.styleable.CircularSeekBar_pointer_halo_width, DEFAULT_POINTER_HALO_WIDTH) * DPTOPX_SCALE;
-        mPointerHaloBorderWidth = attrArray.getFloat(R.styleable.CircularSeekBar_pointer_halo_border_width, DEFAULT_POINTER_HALO_BORDER_WIDTH) * DPTOPX_SCALE;
-        mCircleStrokeWidth = attrArray.getFloat(R.styleable.CircularSeekBar_circle_stroke_width, DEFAULT_CIRCLE_STROKE_WIDTH) * DPTOPX_SCALE;
+        mCircleXRadius = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_circle_x_radius, DEFAULT_CIRCLE_X_RADIUS) * DPTOPX_SCALE);
+        mCircleYRadius = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_circle_y_radius, DEFAULT_CIRCLE_Y_RADIUS) * DPTOPX_SCALE);
+        mPointerRadius = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_pointer_radius, DEFAULT_POINTER_RADIUS) * DPTOPX_SCALE);
+        mPointerHaloWidth = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_pointer_halo_width, DEFAULT_POINTER_HALO_WIDTH) * DPTOPX_SCALE);
+        mPointerHaloBorderWidth = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_pointer_halo_border_width, DEFAULT_POINTER_HALO_BORDER_WIDTH) * DPTOPX_SCALE);
+        mCircleStrokeWidth = (float) (attrArray.getFloat(R.styleable.CircularSeekBar_circle_stroke_width, DEFAULT_CIRCLE_STROKE_WIDTH) * DPTOPX_SCALE);
 
         String tempColor = attrArray.getString(R.styleable.CircularSeekBar_pointer_color);
         if (tempColor != null) {
@@ -848,6 +836,21 @@ public class CircularSeekBar extends View {
         initPaints();
     }
 
+    public CircularSeekBar(Context context) {
+        super(context);
+        init(null, 0);
+    }
+
+    public CircularSeekBar(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(attrs, 0);
+    }
+
+    public CircularSeekBar(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init(attrs, defStyle);
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
@@ -897,12 +900,15 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the circle color.
-     *
-     * @return An integer color value for the circle
+     * Listener for the CircularSeekBar. Implements the same methods as the normal OnSeekBarChangeListener.
      */
-    public int getCircleColor() {
-        return mCircleColor;
+    public interface OnCircularSeekBarChangeListener {
+
+        public abstract void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser);
+
+        public abstract void onStopTrackingTouch(CircularSeekBar seekBar);
+
+        public abstract void onStartTrackingTouch(CircularSeekBar seekBar);
     }
 
     /**
@@ -917,12 +923,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the circle progress color.
+     * Gets the circle color.
      *
-     * @return An integer color value for the circle progress
+     * @return An integer color value for the circle
      */
-    public int getCircleProgressColor() {
-        return mCircleProgressColor;
+    public int getCircleColor() {
+        return mCircleColor;
     }
 
     /**
@@ -937,12 +943,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the pointer color.
+     * Gets the circle progress color.
      *
-     * @return An integer color value for the pointer
+     * @return An integer color value for the circle progress
      */
-    public int getPointerColor() {
-        return mPointerColor;
+    public int getCircleProgressColor() {
+        return mCircleProgressColor;
     }
 
     /**
@@ -957,12 +963,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the pointer halo color.
+     * Gets the pointer color.
      *
-     * @return An integer color value for the pointer halo
+     * @return An integer color value for the pointer
      */
-    public int getPointerHaloColor() {
-        return mPointerHaloColor;
+    public int getPointerColor() {
+        return mPointerColor;
     }
 
     /**
@@ -977,12 +983,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the pointer alpha value.
+     * Gets the pointer halo color.
      *
-     * @return An integer alpha value for the pointer (0..255)
+     * @return An integer color value for the pointer halo
      */
-    public int getPointerAlpha() {
-        return mPointerAlpha;
+    public int getPointerHaloColor() {
+        return mPointerHaloColor;
     }
 
     /**
@@ -999,12 +1005,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the pointer alpha value when touched.
+     * Gets the pointer alpha value.
      *
-     * @return An integer alpha value for the pointer (0..255) when touched
+     * @return An integer alpha value for the pointer (0..255)
      */
-    public int getPointerAlphaOnTouch() {
-        return mPointerAlphaOnTouch;
+    public int getPointerAlpha() {
+        return mPointerAlpha;
     }
 
     /**
@@ -1019,12 +1025,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Gets the circle fill color.
+     * Gets the pointer alpha value when touched.
      *
-     * @return An integer color value for the circle fill
+     * @return An integer alpha value for the pointer (0..255) when touched
      */
-    public int getCircleFillColor() {
-        return mCircleFillColor;
+    public int getPointerAlphaOnTouch() {
+        return mPointerAlphaOnTouch;
     }
 
     /**
@@ -1039,12 +1045,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Get the current max of the CircularSeekBar.
+     * Gets the circle fill color.
      *
-     * @return Synchronized integer value of the max.
+     * @return An integer color value for the circle fill
      */
-    public synchronized int getMax() {
-        return mMax;
+    public int getCircleFillColor() {
+        return mCircleFillColor;
     }
 
     /**
@@ -1070,15 +1076,12 @@ public class CircularSeekBar extends View {
     }
 
     /**
-     * Listener for the CircularSeekBar. Implements the same methods as the normal OnSeekBarChangeListener.
+     * Get the current max of the CircularSeekBar.
+     *
+     * @return Synchronized integer value of the max.
      */
-    public interface OnCircularSeekBarChangeListener {
-
-        void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser);
-
-        void onStopTrackingTouch(CircularSeekBar seekBar);
-
-        void onStartTrackingTouch(CircularSeekBar seekBar);
+    public synchronized int getMax() {
+        return mMax;
     }
 
 }

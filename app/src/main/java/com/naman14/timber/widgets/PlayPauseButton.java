@@ -301,10 +301,6 @@ public class PlayPauseButton extends View {
         invalidate();
     }
 
-    public interface OnControlStatusChangeListener {
-        void onStatusChange(View view, boolean state);
-    }
-
     /**
      * 画面開店時の状態を保存しておくやつ
      */
@@ -373,5 +369,9 @@ public class PlayPauseButton extends View {
         public float getY(double y) {
             return getY((float) y);
         }
+    }
+
+    public interface OnControlStatusChangeListener {
+        void onStatusChange(View view, boolean state);
     }
 }

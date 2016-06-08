@@ -22,7 +22,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -48,11 +47,6 @@ public class Helpers {
         ft.addToBackStack(null);
 
         new AboutDialog().show(ft, "dialog_about");
-    }
-
-    public static String getATEKey(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("dark_theme", false) ?
-                "dark_theme" : "light_theme";
     }
 
     public static class AboutDialog extends DialogFragment {

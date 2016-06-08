@@ -33,8 +33,10 @@ import java.util.ArrayList;
 
 public class ArtistMusicFragment extends Fragment {
 
-    public static RecyclerView songsRecyclerview;
     long artistID = -1;
+
+    public static RecyclerView songsRecyclerview;
+
     ArtistSongAdapter mSongAdapter;
 
     public static ArtistMusicFragment newInstance(long id) {

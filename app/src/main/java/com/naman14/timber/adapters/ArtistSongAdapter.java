@@ -98,89 +98,6 @@ public class ArtistSongAdapter extends RecyclerView.Adapter<ArtistSongAdapter.It
         return (null != arraylist ? arraylist.size() : 0);
     }
 
-    private void setOnPopupMenuListener(ItemHolder itemHolder, final int position) {
-
-        itemHolder.menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                final PopupMenu menu = new PopupMenu(mContext, v);
-                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.popup_song_play:
-                                MusicPlayer.playAll(mContext, songIDs, position, -1, TimberUtils.IdType.NA, false);
-                                break;
-                            case R.id.popup_song_play_next:
-                                long[] ids = new long[1];
-                                ids[0] = arraylist.get(position + 1).id;
-                                MusicPlayer.playNext(mContext, ids, -1, TimberUtils.IdType.NA);
-                                break;
-                            case R.id.popup_song_goto_album:
-                                NavigationUtils.goToAlbum(mContext, arraylist.get(position + 1).albumId);
-                                break;
-                            case R.id.popup_song_goto_artist:
-                                NavigationUtils.goToArtist(mContext, arraylist.get(position + 1).artistId);
-                                break;
-                            case R.id.popup_song_addto_queue:
-                                long[] id = new long[1];
-                                id[0] = arraylist.get(position + 1).id;
-                                MusicPlayer.addToQueue(mContext, id, -1, TimberUtils.IdType.NA);
-                                break;
-                            case R.id.popup_song_addto_playlist:
-                                AddPlaylistDialog.newInstance(arraylist.get(position + 1)).show(((AppCompatActivity) mContext).getSupportFragmentManager(), "ADD_PLAYLIST");
-                                break;
-                        }
-                        return false;
-                    }
-                });
-                menu.inflate(R.menu.popup_song);
-                menu.show();
-            }
-        });
-    }
-
-    private void setUpAlbums(RecyclerView albumsRecyclerview) {
-
-        albumsRecyclerview.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        albumsRecyclerview.setHasFixedSize(true);
-
-        //to add spacing between cards
-        int spacingInPixels = mContext.getResources().getDimensionPixelSize(R.dimen.spacing_card);
-        albumsRecyclerview.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
-        albumsRecyclerview.setNestedScrollingEnabled(false);
-
-
-        ArtistAlbumAdapter mAlbumAdapter = new ArtistAlbumAdapter(mContext, ArtistAlbumLoader.getAlbumsForArtist(mContext, artistID));
-        albumsRecyclerview.setAdapter(mAlbumAdapter);
-    }
-
-    private void clearExtraSpacingBetweenCards(RecyclerView albumsRecyclerview) {
-        //to clear any extra spacing between cards
-        int spacingInPixelstoClear = -(mContext.getResources().getDimensionPixelSize(R.dimen.spacing_card));
-        albumsRecyclerview.addItemDecoration(new SpacesItemDecoration(spacingInPixelstoClear));
-
-    }
-
-    public long[] getSongIds() {
-        List<Song> actualArraylist = new ArrayList<Song>(arraylist);
-        actualArraylist.remove(0);
-        long[] ret = new long[actualArraylist.size()];
-        for (int i = 0; i < actualArraylist.size(); i++) {
-            ret[i] = actualArraylist.get(i).id;
-        }
-        return ret;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        int viewType;
-        if (position == 0) {
-            viewType = 0;
-        } else viewType = 1;
-        return viewType;
-    }
 
     public class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected TextView title, album;
@@ -216,6 +133,72 @@ public class ArtistSongAdapter extends RecyclerView.Adapter<ArtistSongAdapter.It
 
     }
 
+    private void setOnPopupMenuListener(ItemHolder itemHolder, final int position) {
+
+        itemHolder.menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final PopupMenu menu = new PopupMenu(mContext, v);
+                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.popup_song_play:
+                                MusicPlayer.playAll(mContext, songIDs, position, -1, TimberUtils.IdType.NA, false);
+                                break;
+                            case R.id.popup_song_play_next:
+                                long[] ids = new long[1];
+                                ids[0] = arraylist.get(position).id;
+                                MusicPlayer.playNext(mContext, ids, -1, TimberUtils.IdType.NA);
+                                break;
+                            case R.id.popup_song_goto_album:
+                                NavigationUtils.navigateToAlbum(mContext, arraylist.get(position).albumId, null);
+                                break;
+                            case R.id.popup_song_goto_artist:
+                                NavigationUtils.navigateToArtist(mContext, arraylist.get(position).artistId, null);
+                                break;
+                            case R.id.popup_song_addto_queue:
+                                long[] id = new long[1];
+                                id[0] = arraylist.get(position).id;
+                                MusicPlayer.addToQueue(mContext, id, -1, TimberUtils.IdType.NA);
+                                break;
+                            case R.id.popup_song_addto_playlist:
+                                AddPlaylistDialog.newInstance(arraylist.get(position)).show(((AppCompatActivity) mContext).getSupportFragmentManager(), "ADD_PLAYLIST");
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                menu.inflate(R.menu.popup_song);
+                menu.show();
+            }
+        });
+    }
+
+    private void setUpAlbums(RecyclerView albumsRecyclerview) {
+
+        albumsRecyclerview.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
+        albumsRecyclerview.setHasFixedSize(true);
+
+        //to add spacing between cards
+        int spacingInPixels = mContext.getResources().getDimensionPixelSize(R.dimen.spacing_card);
+        albumsRecyclerview.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
+        albumsRecyclerview.setNestedScrollingEnabled(false);
+
+
+        ArtistAlbumAdapter mAlbumAdapter = new ArtistAlbumAdapter(mContext, ArtistAlbumLoader.getAlbumsForArtist(mContext, artistID));
+        albumsRecyclerview.setAdapter(mAlbumAdapter);
+    }
+
+    private void clearExtraSpacingBetweenCards(RecyclerView albumsRecyclerview) {
+        //to clear any extra spacing between cards
+        int spacingInPixelstoClear = -(mContext.getResources().getDimensionPixelSize(R.dimen.spacing_card));
+        albumsRecyclerview.addItemDecoration(new SpacesItemDecoration(spacingInPixelstoClear));
+
+    }
+
+
     public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
         private int space;
 
@@ -232,6 +215,25 @@ public class ArtistSongAdapter extends RecyclerView.Adapter<ArtistSongAdapter.It
 
 
         }
+    }
+
+    public long[] getSongIds() {
+        List<Song> actualArraylist = new ArrayList<Song>(arraylist);
+        actualArraylist.remove(0);
+        long[] ret = new long[actualArraylist.size()];
+        for (int i = 0; i < actualArraylist.size(); i++) {
+            ret[i] = actualArraylist.get(i).id;
+        }
+        return ret;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        int viewType;
+        if (position == 0) {
+            viewType = 0;
+        } else viewType = 1;
+        return viewType;
     }
 }
 

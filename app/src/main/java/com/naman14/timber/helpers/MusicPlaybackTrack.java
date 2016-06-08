@@ -28,6 +28,15 @@ import com.naman14.timber.utils.TimberUtils;
  */
 public class MusicPlaybackTrack implements Parcelable {
 
+    public long mId;
+
+    public long mSourceId;
+
+    public TimberUtils.IdType mSourceType;
+
+    public int mSourcePosition;
+
+
     public static final Creator<MusicPlaybackTrack> CREATOR = new Creator<MusicPlaybackTrack>() {
         @Override
         public MusicPlaybackTrack createFromParcel(Parcel source) {
@@ -39,10 +48,6 @@ public class MusicPlaybackTrack implements Parcelable {
             return new MusicPlaybackTrack[size];
         }
     };
-    public long mId;
-    public long mSourceId;
-    public TimberUtils.IdType mSourceType;
-    public int mSourcePosition;
 
     public MusicPlaybackTrack(long id, long sourceId, TimberUtils.IdType type, int sourcePosition) {
         mId = id;
@@ -76,11 +81,14 @@ public class MusicPlaybackTrack implements Parcelable {
         if (o instanceof MusicPlaybackTrack) {
             MusicPlaybackTrack other = (MusicPlaybackTrack) o;
             if (other != null) {
-                return mId == other.mId
+                if (mId == other.mId
                         && mSourceId == other.mSourceId
                         && mSourceType == other.mSourceType
-                        && mSourcePosition == other.mSourcePosition;
+                        && mSourcePosition == other.mSourcePosition) {
+                    return true;
+                }
 
+                return false;
             }
         }
 
